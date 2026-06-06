@@ -56,9 +56,7 @@ async function startServer() {
       const verifiedPlan = validPlans.includes(subscriptionPlan) ? subscriptionPlan : "full";
 
       // 1. Authenticate performing SaaS user
-      console.log("Authorization Header", req.headers.authorization);
       const callerUser = await getAuthenticatedUser(req);
-      console.log("Authenticated User", callerUser);
       
       // 2. Fetch performing user's profile to check permissions (super_admin or owner)
       const { data: callerProfile, error: profileErr } = await supabaseAdmin
@@ -66,8 +64,6 @@ async function startServer() {
         .select("role")
         .eq("id", callerUser.id)
         .single();
-
-      console.log("Caller Profile", callerProfile);
 
       if (profileErr || !callerProfile) {
         return res.status(403).json({ error: "Access denied. Caller profile not found." });
@@ -218,8 +214,8 @@ async function startServer() {
   });
 
   // API Route: Health
-  app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", supabaseUrl, isReady: !!supabaseAdmin });
+  app.get("/api/health", (_req, res) => {
+    res.json({ status: "ok" });
   });
 
   // Integrate Vite Dev Server in non-production mode, otherwise serve static files

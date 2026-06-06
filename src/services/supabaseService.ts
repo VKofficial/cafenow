@@ -3225,15 +3225,6 @@ export const supabaseService = {
     const { data: sessionData } = await supabase.auth.getSession();
     const token = sessionData?.session?.access_token;
 
-    console.log("Session Data", sessionData);
-    console.log("Access Token", token);
-    console.log("Request Body", {
-      clubName,
-      subscriptionPlan,
-      adminEmail,
-      superAdminOwnerId
-    });
-
     const response = await fetch('/api/admin/create-club-and-admin', {
       method: 'POST',
       headers: {
