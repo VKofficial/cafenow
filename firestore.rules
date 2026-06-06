@@ -1,0 +1,151 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net - Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // Validation functions for each entity shape to prevent resource poisoning
+
+    function isValidAdmin(data) {
+      return data.keys().hasAll(['id', 'username', 'cipher', 'role', 'permissions'])
+        && data.id is string && data.id.size() <= 128
+        && data.username is string && data.username.size() <= 100
+        && data.cipher is string && data.cipher.size() <= 100
+        && data.role is string && (data.role == 'admin' || data.role == 'admin1' || data.role == 'admin2' || data.role == 'admin3')
+        && data.permissions is string && (data.permissions == 'SNOOKER' || data.permissions == 'CAFE' || data.permissions == 'BOTH');
+    }
+
+    function isValidTable(data) {
+      return data.keys().hasAll(['id', 'number', 'type', 'status', 'rate', 'rateUnit'])
+        && data.id is string && data.id.size() <= 128
+        && data.number is string && data.number.size() <= 50
+        && data.type is string && (data.type == 'Snooker' || data.type == 'Pool' || data.type == 'PS5' || data.type == 'Mini Snooker' || data.type == 'Other Games')
+        && data.status is string && (data.status == 'RUNNING' || data.status == 'AVAILABLE' || data.status == 'MAINTENANCE' || data.status == 'RESERVED')
+        // Allow rate to be a number (float or int)
+        && (data.rate is number || data.rate is int || data.rate is float)
+        && data.rateUnit is string && (data.rateUnit == 'min' || data.rateUnit == 'hr');
+    }
+
+    function isValidMember(data) {
+      return data.keys().hasAll(['id', 'name', 'contact', 'joinedDate', 'status'])
+        && data.id is string && data.id.size() <= 128
+        && data.name is string && data.name.size() <= 200
+        && data.contact is string && data.contact.size() <= 100
+        && data.joinedDate is string && data.joinedDate.size() <= 100
+        && data.status is string && (data.status == 'Active' || data.status == 'Inactive');
+    }
+
+    function isValidTransaction(data) {
+      return data.keys().hasAll(['id', 'date', 'amount', 'paymentMethod', 'tableNumber', 'playerName', 'duration'])
+        && data.id is string && data.id.size() <= 128
+        && data.date is string && data.date.size() <= 100
+        && (data.amount is number || data.amount is int || data.amount is float)
+        && data.paymentMethod is string && (data.paymentMethod == 'CASH' || data.paymentMethod == 'CARD' || data.paymentMethod == 'UPI' || data.paymentMethod == 'PAY_LATER')
+        && data.tableNumber is string && data.tableNumber.size() <= 50
+        && data.playerName is string && data.playerName.size() <= 200
+        && data.duration is string && data.duration.size() <= 50;
+    }
+
+    function isValidExpenditure(data) {
+      return data.keys().hasAll(['id', 'date', 'description', 'amount', 'category'])
+        && data.id is string && data.id.size() <= 128
+        && data.date is string && data.date.size() <= 100
+        && data.description is string && data.description.size() <= 500
+        && (data.amount is number || data.amount is int || data.amount is float)
+        && data.category is string && (data.category == 'Supplies' || data.category == 'Maintenance' || data.category == 'Rent' || data.category == 'Utilities' || data.category == 'Salaries' || data.category == 'Other');
+    }
+
+    function isValidMenuItem(data) {
+      return data.keys().hasAll(['id', 'name', 'price', 'category'])
+        && data.id is string && data.id.size() <= 128
+        && data.name is string && data.name.size() <= 200
+        && (data.price is number || data.price is int || data.price is float)
+        && data.category is string && data.category.size() <= 100;
+    }
+
+    function isValidMenuCategory(data) {
+      return data.keys().hasAll(['id', 'name'])
+        && data.id is string && data.id.size() <= 128
+        && data.name is string && data.name.size() <= 100;
+    }
+
+    function isValidHappyHourSettings(data) {
+      return data.keys().hasAll(['id', 'isEnabled', 'snookerRate', 'poolRate', 'ps5Rate', 'miniSnookerRate', 'otherRate', 'updatedAt'])
+        && data.id is string && data.id.size() <= 128
+        && data.isEnabled is bool
+        && (data.snookerRate is number || data.snookerRate is int || data.snookerRate is float)
+        && (data.poolRate is number || data.poolRate is int || data.poolRate is float)
+        && (data.ps5Rate is number || data.ps5Rate is int || data.ps5Rate is float)
+        && (data.miniSnookerRate is number || data.miniSnookerRate is int || data.miniSnookerRate is float)
+        && (data.otherRate is number || data.otherRate is int || data.otherRate is float)
+        && data.updatedAt is string && data.updatedAt.size() <= 100;
+    }
+
+    // Rules for Admins Collection
+    match /admins/{adminId} {
+      allow read: if true;
+      allow create, update: if isValidId(adminId) && isValidAdmin(incoming());
+      allow delete: if true;
+    }
+
+    // Rules for Tables Collection
+    match /tables/{tableId} {
+      allow read: if true;
+      allow create, update: if isValidId(tableId) && isValidTable(incoming());
+      allow delete: if true;
+    }
+
+    // Rules for Members Collection
+    match /members/{memberId} {
+      allow read: if true;
+      allow create, update: if isValidId(memberId) && isValidMember(incoming());
+      allow delete: if true;
+    }
+
+    // Rules for Billing History Collection
+    match /billing_history/{historyId} {
+      allow read: if true;
+      allow create, update: if isValidId(historyId) && isValidTransaction(incoming());
+      allow delete: if true;
+    }
+
+    // Rules for Expenditures Collection
+    match /expenditures/{expId} {
+      allow read: if true;
+      allow create, update: if isValidId(expId) && isValidExpenditure(incoming());
+      allow delete: if true;
+    }
+
+    // Rules for Menu Items Collection
+    match /menu_items/{itemId} {
+      allow read: if true;
+      allow create, update: if isValidId(itemId) && isValidMenuItem(incoming());
+      allow delete: if true;
+    }
+
+    // Rules for Menu Categories Collection
+    match /menu_categories/{catId} {
+      allow read: if true;
+      allow create, update: if isValidId(catId) && isValidMenuCategory(incoming());
+      allow delete: if true;
+    }
+
+    // Rules for Happy Hour Settings Collection
+    match /happy_hour_settings/{settingId} {
+      allow read: if true;
+      allow create, update: if isValidId(settingId) && isValidHappyHourSettings(incoming());
+      allow delete: if true;
+    }
+  }
+}

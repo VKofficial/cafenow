@@ -1,0 +1,6 @@
+{
+  "name": "Obsidian Cue Control",
+  "description": "Mission Control for premium snooker and billiards clubs. A clinical, authoritative dashboard for table management, real-time tracking, and technical luxury club operations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

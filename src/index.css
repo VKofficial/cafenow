@@ -1,0 +1,273 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Obsidian Palette */
+  --color-obsidian-950: #050505;
+  --color-obsidian-900: #0d1515;
+  --color-obsidian-800: #121212;
+  --color-obsidian-750: #151d1e;
+  --color-obsidian-700: #192122;
+
+  /* Neon Accents */
+  --color-neon-blue: #00dbe9;
+  --color-neon-blue-bright: #7df4ff;
+  --color-neon-blue-glow: #00f0ff;
+  
+  --color-cyber-lime: #bcff5f;
+  --color-cyber-lime-bright: #a8f928;
+  
+  --color-pulse-red: #ffb4ab;
+  --color-pulse-red-deep: #c10014;
+
+  /* Theme-specific variables */
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-secondary: var(--color-cyber-lime);
+  --color-tertiary: var(--color-pulse-red);
+  --color-background: var(--bg);
+  --color-on-background: var(--on-bg);
+  --color-surface: var(--surface);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-surface-variant: var(--surface-variant);
+  --color-outline: var(--outline);
+
+  /* Layout */
+  --spacing-gutter: 24px;
+  --spacing-margin-page: 40px;
+}
+
+:root {
+  /* Default Dark Mode - Premium Snooker Club Lounge Aesthetic */
+  --primary: var(--color-neon-blue-bright);
+  --on-primary: #030d08;
+  --bg: #030805;                         /* Luxurious deep olive velvet black */
+  --on-bg: #e6f0eb;
+  --surface: #0a1410;                    /* Gorgeous rich charcoal felt-slate card backgrounds */
+  --on-surface: #e6f0eb;
+  --on-surface-variant: #a0b2aa;         /* Crisp mint-gray text for secondary information */
+  --surface-variant: #11221b;            /* Internal section backgrounds */
+  --outline: #385547;                    /* Clean chalk green border outline */
+  --glass-bg: rgba(10, 20, 16, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.06);
+}
+
+.light {
+  /* Ultra-Refined Light Mode - Pristine ivory linen, rich mahogany & felt-green typography */
+  --primary: #0d422a;                    /* Rich traditional tournament felt green */
+  --on-primary: #ffffff;
+  --bg: #f9f7f0;                         /* Royal club polished warm ivory linen cream background */
+  --on-bg: #071710;                      /* Rich mahogany/forest black for flawless readability */
+  --surface: #ffffff;                    /* Immaculate white card components */
+  --on-surface: #071710;                 /* Dark forest accent color for high definition text */
+  --on-surface-variant: #20352c;         /* High-contrast readable hunter-green descriptions */
+  --surface-variant: #e9e5d9;            /* Subdued clay/chalk beige panel styling */
+  --outline: #5c7569;                    /* Pronounced billiard borders to avoid merging */
+  --glass-bg: rgba(255, 255, 255, 0.98);
+  --glass-border: rgba(13, 66, 42, 0.22);
+}
+
+/* 
+  Flawless Light Theme Contrast Correction Rules:
+  Guarantees that hardcoded dark-mode elements (such as white low-opacity backgrounds or text)
+  readjust dynamically to remain fully defined and highly readable.
+*/
+.light [class*="bg-white/5"],
+.light [class*="bg-white/10"],
+.light [class*="bg-white/20"],
+.light [class*="bg-white/[0.01]"],
+.light [class*="bg-white/[0.02]"],
+.light [class*="bg-white/[0.03]"],
+.light [class*="bg-white/[0.04]"],
+.light [class*="bg-white/[0.05]"],
+.light [class*="bg-white/7"],
+.light [class*="bg-white/[0.07]"] {
+  background-color: rgba(13, 66, 42, 0.07) !important;
+}
+
+.light [class*="bg-on-surface/5"] {
+  background-color: rgba(13, 66, 42, 0.08) !important;
+}
+
+.light [class*="border-white/5"],
+.light [class*="border-white/10"],
+.light [class*="border-white/20"],
+.light [class*="border-outline/10"],
+.light [class*="border-outline/20"] {
+  border-color: rgba(13, 66, 42, 0.18) !important;
+}
+
+/* Avoid low-contrast text on warm ivory */
+.light [class*="text-on-surface-variant/40"],
+.light [class*="text-on-surface-variant/30"],
+.light [class*="text-on-surface-variant/20"],
+.light [class*="text-on-surface-variant/50"] {
+  color: rgba(32, 53, 44, 0.7) !important;
+}
+
+.light [class*="text-white/60"],
+.light [class*="text-white/40"],
+.light [class*="text-white/50"],
+.light [class*="text-white/70"] {
+  color: rgba(7, 23, 16, 0.75) !important;
+}
+
+.light [class*="text-on-surface-variant/70"],
+.light [class*="text-on-surface-variant/80"] {
+  color: rgba(7, 23, 16, 0.9) !important;
+}
+
+/* Prevent text-white or white hover from washing out on light surfaces */
+.light .text-white,
+.light [class*="text-white"] {
+  color: #071710 !important;
+}
+
+.light .hover\:text-white:hover,
+.light [class*="hover:text-white"]:hover {
+  color: #0d422a !important;
+}
+
+.light [class*="text-neon-blue-bright"] {
+  color: #0d422a !important;
+}
+
+.light [class*="hover:border-white/10"]:hover {
+  border-color: rgba(13, 66, 42, 0.3) !important;
+}
+
+/* Inputs, Placeholders and custom tags adjustments */
+.light input::placeholder {
+  color: rgba(32, 53, 44, 0.5) !important;
+}
+
+.light select,
+.light input {
+  background-color: #ffffff !important;
+  color: #071710 !important;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-on-surface antialiased transition-colors duration-300 selection:bg-neon-blue/30 selection:text-neon-blue-bright;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+  }
+  
+  .glass-technical {
+    background: var(--glass-bg);
+    backdrop-filter: blur(40px);
+    border: 1px solid var(--color-neon-blue);
+    border-opacity: 0.15;
+  }
+
+  .glow-blue {
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+  }
+
+  .glow-lime {
+    box-shadow: 0 0 15px rgba(188, 255, 95, 0.15);
+  }
+
+  .glow-lime-sm {
+    text-shadow: 0 0 10px rgba(188, 255, 95, 0.4);
+  }
+
+  .text-neon-blue-glow {
+    @apply text-neon-blue;
+    text-shadow: 0 0 20px rgba(0, 219, 233, 0.5);
+  }
+
+  .text-neon-blue-glow-sm {
+    @apply text-neon-blue;
+    text-shadow: 0 0 10px rgba(0, 219, 233, 0.4);
+  }
+
+  .glow-red {
+    box-shadow: 0 0 15px rgba(255, 180, 171, 0.15);
+  }
+  
+  .pulse-lime {
+    animation: pulse-lime 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-lime {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .animate-breathing-lime {
+    animation: breathing-lime 3s ease-in-out infinite;
+  }
+
+  @keyframes breathing-lime {
+    0%, 100% {
+      box-shadow: 0 0 12px rgba(188, 255, 95, 0.12);
+      border-color: rgba(188, 255, 95, 0.25);
+    }
+    50% {
+      box-shadow: 0 0 22px rgba(188, 255, 95, 0.35);
+      border-color: rgba(188, 255, 95, 0.6);
+    }
+  }
+
+  .animate-breathing-amber {
+    animation: breathing-amber 3s ease-in-out infinite;
+  }
+
+  @keyframes breathing-amber {
+    0%, 100% {
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.12);
+      border-color: rgba(245, 158, 11, 0.25);
+    }
+    50% {
+      box-shadow: 0 0 22px rgba(245, 158, 11, 0.35);
+      border-color: rgba(245, 158, 11, 0.6);
+    }
+  }
+}
+
+@media print {
+  /* Hide the entire page except for the printable invoice */
+  body * {
+    visibility: hidden;
+    background: transparent !important;
+  }
+  
+  #printable-invoice, #printable-invoice * {
+    visibility: visible;
+  }
+  
+  #printable-invoice {
+    position: absolute;
+    left: 0;
+    top: 5mm;
+    width: 72mm; /* Fits nicely on standard thermal paper */
+    max-width: 100%;
+    color: #000000 !important;
+    background: #ffffff !important;
+    padding: 0;
+    margin: 0;
+    font-family: var(--font-mono), monospace !important;
+    border: none !important;
+    box-shadow: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Force hidden elements on normal viewport to print if they are inside invoice */
+  #printable-invoice .hidden-on-print {
+    display: none !important;
+  }
+}
+

@@ -1,0 +1,25 @@
+import { MenuItem } from './types';
+
+export const CAFE_MENU: MenuItem[] = [
+  { id: '1', name: 'Cold Coffee', price: 70, category: 'Beverage', is_available: true },
+  { id: '2', name: 'White Cold Coffee', price: 60, category: 'Beverage', is_available: true },
+  { id: '3', name: 'Black Coffee', price: 40, category: 'Beverage', is_available: true },
+  { id: '4', name: 'Kitkat Shake', price: 90, category: 'Beverage', is_available: true },
+  { id: '5', name: 'Oreo Shake', price: 90, category: 'Beverage', is_available: true },
+  { id: '6', name: 'Espresso', price: 35, category: 'Beverage', is_available: true },
+  { id: '7', name: 'Hot Coffee', price: 30, category: 'Beverage', is_available: true },
+  { id: '8', name: 'Chai', price: 20, category: 'Beverage', is_available: true },
+  { id: '12', name: 'Iced Tea', price: 50, category: 'Beverage', is_available: true },
+  { id: '13', name: 'Virgin Mojito', price: 80, category: 'Beverage', is_available: true },
+  { id: '14', name: 'Hot Chocolate', price: 65, category: 'Beverage', is_available: true },
+  { id: '15', name: 'Masala Maggi', price: 45, category: 'Snack', is_available: true },
+  { id: '16', name: 'Cheese Grilled Sandwich', price: 80, category: 'Snack', is_available: true },
+  { id: '17', name: 'Peri Peri Fries', price: 90, category: 'Snack', is_available: true },
+  { id: '18', name: 'Veg Burger', price: 75, category: 'Snack', is_available: true },
+  { id: '19', name: 'Paneer Wrap', price: 110, category: 'Snack', is_available: true },
+  { id: '9', name: 'Donut', price: 150, category: 'Dessert', is_available: true },
+  { id: '10', name: 'Chocolate Brownie', price: 120, category: 'Dessert', is_available: true },
+  { id: '11', name: 'Death by Chocolate', price: 145, category: 'Dessert', is_available: true },
+  { id: '20', name: 'Ice Cream Scoop', price: 40, category: 'Dessert', is_available: true },
+  { id: '21', name: 'Red Velvet Pastry', price: 85, category: 'Dessert', is_available: true },
+];
