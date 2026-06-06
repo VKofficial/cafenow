@@ -1,15 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || 'https://qrrisrdgzejivftgysie.supabase.co').trim();
-const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_2bIjZRu3UqEJiAY4zsfYzg_6UuG9aDQ').trim();
+const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL ?? '').trim();
+const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY ?? '').trim();
 
-// Check if credentials are valid, non-empty, and they are not the placeholder text from instructions
-export const isSupabaseConfigured = 
-  supabaseUrl !== '' && 
-  supabaseAnonKey !== '' && 
-  supabaseUrl.startsWith('https://') && 
-  !supabaseUrl.includes('your_project_url_here') && 
-  !supabaseAnonKey.includes('your_anon_key_here');
+const PLACEHOLDER_PATTERNS = ['your_project_url_here', 'your_anon_key_here'];
+
+// Check if credentials are valid, non-empty, and they are not placeholder text from instructions
+export const isSupabaseConfigured =
+  supabaseUrl.startsWith('https://') &&
+  supabaseAnonKey.length > 0 &&
+  !PLACEHOLDER_PATTERNS.some(
+    (placeholder) =>
+      supabaseUrl.includes(placeholder) || supabaseAnonKey.includes(placeholder)
+  );
 
 if (!isSupabaseConfigured) {
   console.warn(
