@@ -371,27 +371,6 @@ export default function App() {
     }
   };
 
-  // Always start with a completely clean authentication state on initial load/refresh
-  useEffect(() => {
-    localStorage.removeItem('active_admin_username');
-    localStorage.removeItem('active_admin_role');
-    localStorage.removeItem('active_admin_permissions');
-    localStorage.removeItem('active_admin_id');
-    localStorage.removeItem('active_club_id');
-    localStorage.removeItem('active_club_name');
-    localStorage.removeItem('obsidian_admins_local_v1');
-    localStorage.removeItem('obsidian_admins_local');
-    localStorage.removeItem('cue_control_admins');
-    supabaseService.setActiveAdminUsername('');
-    supabaseService.setActiveAdminRole('');
-    supabaseService.setActiveAdminPermissions('');
-    supabaseService.setActiveAdminId('');
-    supabaseService.setActiveClubId('');
-    setActiveClubId('');
-    setActiveClubName('');
-    setIsAuthenticated(false);
-  }, []);
-
   // Rigorous active session subscription lifecycle enforcement loop
   useEffect(() => {
     if (!isAuthenticated || !activeClubId) return;
@@ -698,6 +677,57 @@ export default function App() {
       }
     }
   };
+
+  // Restore Supabase session on refresh instead of clearing auth state
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+
+    let cancelled = false;
+
+    async function bootstrapSession() {
+      try {
+        const account = await supabaseService.restoreSession();
+        if (cancelled || !account) return;
+        await handleLogin(
+          account.role,
+          account.permissions,
+          account.username,
+          account.id,
+        );
+      } catch (err: unknown) {
+        if (cancelled) return;
+        console.error("Session restore failed:", err);
+        const message =
+          err instanceof Error ? err.message : "Session restore failed.";
+        if (message) alert(message);
+        handleLogout();
+      }
+    }
+
+    bootstrapSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event) => {
+        if (event === "SIGNED_OUT") {
+          setIsAuthenticated(false);
+          setUserRole("admin");
+          setCurrentView("Tables");
+          setActiveClubId("");
+          setActiveClubName("");
+          supabaseService.setActiveAdminUsername("");
+          supabaseService.setActiveAdminRole("");
+          supabaseService.setActiveAdminPermissions("");
+          supabaseService.setActiveAdminId("");
+          supabaseService.setActiveClubId("");
+        }
+      },
+    );
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [accentColor, setAccentColor] = useState<string>(() => {
