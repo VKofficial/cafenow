@@ -879,6 +879,63 @@ async function seedIfNeeded() {
   isSeeded = true;
 }
 
+async function resolveAccountFromAuthUser(
+  user: { id: string; email?: string | null },
+  cipher = ''
+): Promise<AdminAccount> {
+  const { data: profile, error: profError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  if (profError || !profile) {
+    await supabase.auth.signOut();
+    throw new Error(
+      'Account not provisioned. Contact your administrator to set up your profile.'
+    );
+  }
+
+  let permissions: 'CAFE' | 'SNOOKER' | 'BOTH' = 'BOTH';
+  if (profile.club_id) {
+    setActiveClubId(profile.club_id);
+    const { data: club } = await supabase
+      .from('clubs')
+      .select('subscription_plan, subscription_status')
+      .eq('id', profile.club_id)
+      .maybeSingle();
+    if (club) {
+      if (club.subscription_status === 'suspended') {
+        throw new Error('Subscription suspended. Contact support.');
+      }
+      if (club.subscription_status === 'pending_deletion') {
+        throw new Error('Club scheduled for deletion. Access revoked.');
+      }
+      if (club.subscription_status === 'deleted') {
+        throw new Error('Club has been permanently deleted.');
+      }
+      if (club.subscription_plan === 'cafe_only') permissions = 'CAFE';
+      else if (club.subscription_plan === 'snooker_only') permissions = 'SNOOKER';
+    }
+  } else {
+    setActiveClubId('');
+  }
+
+  const username = (user.email || '').split('@')[0];
+  setActiveAdminRole(profile.role);
+  setActiveAdminUsername(username);
+  setActiveAdminPermissions(permissions);
+  setActiveAdminId(user.id);
+
+  return {
+    id: user.id,
+    username,
+    cipher,
+    role: profile.role,
+    permissions,
+  };
+}
+
 export const supabaseService = {
   setActiveAdminUsername(username: string) {
     setActiveAdminUsername(username);
@@ -3029,6 +3086,9 @@ export const supabaseService = {
     const pw = cipherOrPw;
 
     if (!isSupabaseConfigured) {
+      if (import.meta.env.PROD) {
+        throw new Error('Supabase is required in production.');
+      }
       // Clean, dynamic local credentials resolver (no hardcoding, no local storage dependency)
       const role = input.includes('super') ? 'super_admin' : (input.includes('owner') ? 'owner' : 'club_admin');
       const mockClubId = role === 'club_admin' ? '00000000-0000-0000-0000-111111111111' : '';
@@ -3067,74 +3127,24 @@ export const supabaseService = {
       }
 
       if (authData && authData.user) {
-        const user = authData.user;
-        const { data: profile, error: profError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-
-        if (profError || !profile) {
-          const autoRole = email.includes('super') ? 'super_admin' : (email.includes('owner') ? 'owner' : 'club_admin');
-          const finalProfile = {
-            id: user.id,
-            role: autoRole,
-            club_id: null,
-            owner_id: null
-          };
-          await supabase.from('profiles').insert([finalProfile]);
-          
-          setActiveAdminRole(autoRole);
-          setActiveAdminUsername((user.email || '').split('@')[0]);
-          setActiveAdminPermissions('BOTH');
-          setActiveClubId('');
-          return {
-            id: user.id,
-            username: (user.email || '').split('@')[0],
-            cipher: pw,
-            role: autoRole,
-            permissions: 'BOTH'
-          };
-        }
-
-        let permissions: 'CAFE' | 'SNOOKER' | 'BOTH' = 'BOTH';
-        if (profile.club_id) {
-          setActiveClubId(profile.club_id);
-          const { data: club } = await supabase.from('clubs').select('subscription_plan, subscription_status').eq('id', profile.club_id).maybeSingle();
-          if (club) {
-            if (club.subscription_status === 'suspended') {
-              throw new Error("Subscription suspended. Contact support.");
-            } else if (club.subscription_status === 'pending_deletion') {
-              throw new Error("Club scheduled for deletion. Access revoked.");
-            } else if (club.subscription_status === 'deleted') {
-              throw new Error("Club has been permanently deleted.");
-            }
-            if (club.subscription_plan) {
-              if (club.subscription_plan === 'cafe_only') permissions = 'CAFE';
-              else if (club.subscription_plan === 'snooker_only') permissions = 'SNOOKER';
-            }
-          }
-        } else {
-          setActiveClubId('');
-        }
-
-        setActiveAdminRole(profile.role);
-        setActiveAdminUsername((user.email || '').split('@')[0]);
-        setActiveAdminPermissions(permissions);
-
-        return {
-          id: user.id,
-          username: (user.email || '').split('@')[0],
-          cipher: pw,
-          role: profile.role,
-          permissions: permissions
-        };
+        return resolveAccountFromAuthUser(authData.user, pw);
       }
       return null;
     } catch (error) {
       console.warn('Real Auth Error:', error);
       throw error;
     }
+  },
+
+  async restoreSession(): Promise<AdminAccount | null> {
+    if (!isSupabaseConfigured) {
+      return null;
+    }
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      return null;
+    }
+    return resolveAccountFromAuthUser(session.user);
   },
 
   async logout(): Promise<void> {
